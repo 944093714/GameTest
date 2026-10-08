@@ -1,0 +1,32 @@
+# Unreal Engine generated / build artifacts
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.VC.db
+*.opendb
+*.sln.docstates
+
+# IDE
+.idea/
+.vscode/
+
+# Rider auto-generated integration plugin (regenerated on open)
+Plugins/Developer/RiderLink/
+*.swp
+*.swo
+
+# Binary asset backups / auto-generated
+Content/*.upreview
+Logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
