@@ -14,4 +14,5 @@ class TEST01_API AMyCharacter : public AMyBaseCharacter
 {
 	GENERATED_BODY()
 	
+	
 };
