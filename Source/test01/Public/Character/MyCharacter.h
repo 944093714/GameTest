@@ -13,6 +13,11 @@ UCLASS()
 class TEST01_API AMyCharacter : public AMyBaseCharacter
 {
 	GENERATED_BODY()
+public:
+	AMyCharacter();
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 	
-	
+private:
+	void SetPlayerInfo();
 };

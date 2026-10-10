@@ -14,3 +14,8 @@ void AMyBaseCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 }
+
+UAbilitySystemComponent* AMyBaseCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
+}

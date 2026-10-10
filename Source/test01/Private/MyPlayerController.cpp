@@ -5,10 +5,10 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "SAdvancedTransformInputBox.h"
-#include "ToolContextInterfaces.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "Character/MyEnemy.h"
+
 
 AMyPlayerController::AMyPlayerController()
 {
@@ -25,6 +25,48 @@ AMyPlayerController::AMyPlayerController()
 		MoveAction = IAMove.Object;
 	}
 }
+
+
+void AMyPlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+	
+	CursorTrace();
+}
+void AMyPlayerController::CursorTrace()
+{
+	FHitResult CursorHit;
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	if (!CursorHit.bBlockingHit) return;
+	
+	LastActor = ThisActor;
+	ThisActor = Cast<IMyInterface>(CursorHit.GetActor());
+	
+	if (LastActor==nullptr)
+	{
+		if (ThisActor!=nullptr)
+		{
+			ThisActor->HighlightActor();
+		}
+	}
+	else
+	{
+		if (ThisActor==nullptr)
+		{
+			LastActor->UnHighlightActor();
+		}
+		else
+		{
+			if (ThisActor!=LastActor)
+			{
+				LastActor->UnHighlightActor();
+				ThisActor->HighlightActor();
+			}
+		}
+	}
+}
+
+
 
 void AMyPlayerController::BeginPlay()
 {
@@ -68,10 +110,11 @@ void AMyPlayerController::Move(const FInputActionValue& InputActionValue)
 	
 	if(APawn* ControlledPawn = GetPawn<APawn>())
 	{
-		ControlledPawn->AddMovementInput(ForwardDirection,InputAxisVector.Y);
-		ControlledPawn->AddMovementInput(RightDirection,InputAxisVector.X);
+		ControlledPawn->AddMovementInput(ForwardDirection,InputAxisVector.X);
+		ControlledPawn->AddMovementInput(RightDirection,InputAxisVector.Y);
 	}
 	
 }
+
 
 
