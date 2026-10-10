@@ -7,8 +7,10 @@
 // 实际的高亮逻辑在实现类 AMyEnemy 里 override,见 Character/MyEnemy.cpp。
 void IMyInterface::HighlightActor()
 {
+	// 空实现：仅满足链接要求；实际逻辑由 AMyEnemy::HighlightActor 提供
 }
 
 void IMyInterface::UnHighlightActor()
 {
+	// 空实现：仅满足链接要求；实际逻辑由 AMyEnemy::UnHighlightActor 提供
 }

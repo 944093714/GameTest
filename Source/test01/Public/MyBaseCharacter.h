@@ -11,22 +11,29 @@
 class UAbilitySystemComponent;
 class UAttributeSet;
 
+/**
+ * 角色基类
+ * 同时继承 ACharacter(运动/骨骼网格) 与 IAbilitySystemInterface(暴露 GAS 组件)。
+ * 玩家(AMyCharacter)与敌人(AMyEnemy)都继承它。
+ */
 UCLASS()
-class TEST01_API AMyBaseCharacter : public ACharacter,public IAbilitySystemInterface
+class TEST01_API AMyBaseCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	AMyBaseCharacter();
 	virtual void BeginPlay() override;
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UAttributeSet* GetAttributeSet() const{ return AttributeSet; }
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;   // 实现 GAS 接口
+	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集
 protected:
-	
-	UPROPERTY(EditAnywhere,Category = "Combat")
+	// 右手武器(实际挂在骨骼插槽 WeaponHandSocket 上)
+	UPROPERTY(EditAnywhere, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent> Weapon;
+	// GAS 组件(玩家由 PlayerState 提供并绑定; 敌人在自身创建)
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystem;
+	// 属性集(同上，来源因类而异)
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 };
