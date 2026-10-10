@@ -2,7 +2,7 @@
 
 
 #include "AbilitySystem/MyAttributeSet.h"
-#include "AbilitySystemComponent.h"
+
 #include "Net/UnrealNetwork.h"
 
 void UMyAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
@@ -23,6 +23,14 @@ void UMyAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMna) const
 void UMyAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UMyAttributeSet,Health,MaxOldMana);
+}
+
+UMyAttributeSet::UMyAttributeSet()
+{
+	InitHealth(100.f);
+	InitMaxHealth(100.f);
+	InitMana(100.f);
+	InitMaxMana(100.f);
 }
 
 void UMyAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

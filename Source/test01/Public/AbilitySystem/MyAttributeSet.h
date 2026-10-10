@@ -4,8 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
+#include "AbilitySystemComponent.h"
 #include "MyAttributeSet.generated.h"
 
+#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 /**
  * 
  */
@@ -14,23 +20,24 @@ class TEST01_API UMyAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
+	UMyAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Health,Category="Vital Attributes")
 	FGameplayAttributeData Health;
-	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UMyAttributeSet, Health);
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Health);
 	
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Health,Category="Vital Attributes")
 	FGameplayAttributeData MaxHealth;
-	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UMyAttributeSet, MaxHealth);
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxHealth);
 	
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Health,Category="Vital Attributes")
 	FGameplayAttributeData Mana;
-	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UMyAttributeSet, Mana);
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Mana);
 	
 	UPROPERTY(BlueprintReadOnly,ReplicatedUsing = OnRep_Health,Category="Vital Attributes")
 	FGameplayAttributeData MaxMana;
-	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(UMyAttributeSet, MaxMana);
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxMana);
 	
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
