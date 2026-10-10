@@ -30,8 +30,8 @@ void UMyAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) co
 UMyAttributeSet::UMyAttributeSet()
 {
 	InitHealth(100.f);
-	InitMaxHealth(500.f);
-	InitMana(300.f);
+	InitMaxHealth(100.f);
+	InitMana(100.f);
 	InitMaxMana(100.f);
 }
 
