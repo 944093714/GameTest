@@ -12,7 +12,7 @@
 // 构造函数：bReplicates 允许网络复制，并从内容资源加载增强输入配置
 AMyPlayerController::AMyPlayerController()
 {
-	bReplicates = true;   // 允许控制器复制（当前基本为单机用法）
+	bReplicates = true; // 允许控制器复制（当前基本为单机用法）
 
 	// // 从 /Game/BP/Input 路径静态加载资源（FObjectFinder 在构造期查找资产）
 	// static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(TEXT("/Game/BP/Input/IMC_Mapping.IMC_Mapping"));
@@ -32,18 +32,18 @@ void AMyPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
-	CursorTrace();   // 核心鼠标高亮逻辑逐帧运行
+	CursorTrace(); // 核心鼠标高亮逻辑逐帧运行
 }
 
 // 鼠标追踪：从鼠标位置向下发射可见性射线，命中实现 IMyInterface 的 Actor 时切换高亮
 void AMyPlayerController::CursorTrace()
 {
 	FHitResult CursorHit;
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);   // 可见性通道射线
-	if (!CursorHit.bBlockingHit) return;   // 未命中任何物体 → 直接结束
+	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit); // 可见性通道射线
+	if (!CursorHit.bBlockingHit) return; // 未命中任何物体 → 直接结束
 
-	LastActor = ThisActor;   // 上一帧结果归档
-	ThisActor = Cast<IMyInterface>(CursorHit.GetActor());   // 当前帧命中者是否实现了接口
+	LastActor = ThisActor; // 上一帧结果归档
+	ThisActor = Cast<IMyInterface>(CursorHit.GetActor()); // 当前帧命中者是否实现了接口
 
 	// 三态切换：处理"进入 / 离开 / 更换目标"的高亮变化
 	if (LastActor == nullptr)
@@ -79,22 +79,25 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(MyInputMappingContext);   // 校验输入上下文已加载成功
+	check(MyInputMappingContext); // 校验输入上下文已加载成功
 
 	// 获取本地玩家子系统并注册映射上下文（优先级 0）
 	UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	check(Subsystem);
 
-	Subsystem->AddMappingContext(MyInputMappingContext, 0);
+	if (Subsystem != nullptr)
+	{
+		Subsystem->AddMappingContext(MyInputMappingContext, 0);
+	}
 
-	bShowMouseCursor = true;                    // 显示鼠标(RPG 俯视角需要)
+
+	bShowMouseCursor = true; // 显示鼠标(RPG 俯视角需要)
 	DefaultMouseCursor = EMouseCursor::Default;
 
 	// 游戏与 UI 同时接收输入的混合模式
 	FInputModeGameAndUI InputMode;
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 不锁在视口内
-	InputMode.SetHideCursorDuringCapture(false);                         // 不被遮挡光标
+	InputMode.SetHideCursorDuringCapture(false); // 不被遮挡光标
 	SetInputMode(InputMode);
 }
 
@@ -112,9 +115,9 @@ void AMyPlayerController::SetupInputComponent()
 // 移动处理：将 2D 输入轴量转为相对视角(仅 Yaw)的前/右方向输入
 void AMyPlayerController::Move(const FInputActionValue& InputActionValue)
 {
-	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();   // WASD 得到的二维轴量
-	const FRotator InputAxisRotation = GetControlRotation();               // 当前相机旋转
-	const FRotator YawRotation(0.f, InputAxisRotation.Yaw, 0.f);           // 只取 Yaw，保证水平移动
+	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>(); // WASD 得到的二维轴量
+	const FRotator InputAxisRotation = GetControlRotation(); // 当前相机旋转
+	const FRotator YawRotation(0.f, InputAxisRotation.Yaw, 0.f); // 只取 Yaw，保证水平移动
 
 	// 由仅含 Yaw 的旋转矩阵取单位轴：X=前方向，Y=右方向
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
@@ -127,6 +130,3 @@ void AMyPlayerController::Move(const FInputActionValue& InputActionValue)
 		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
 	}
 }
-
-
-

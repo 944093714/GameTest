@@ -9,6 +9,8 @@
 #include "AbilitySystemComponent.h"
 #include "MyPlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "MyPlayerController.h"
+#include "UI/MyHUD.h"
 
 // 构造函数：设置角色的移动表现（朝向随速度旋转、锁定在平面内）
 AMyCharacter::AMyCharacter()
@@ -51,4 +53,16 @@ void AMyCharacter::SetPlayerInfo()
 	// 从 PlayerState 取回 GAS 组件与属性集，供本角色后续使用（存进基类的指针）
 	AbilitySystem = MyPlayerState->GetAbilitySystemComponent();
 	AttributeSet  = MyPlayerState->GetAttributeSet();
+	
+	if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetController()))
+	{
+		if (AMyHUD * MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))
+		{
+			MyHUD->InitOverlay(MyPlayerController,MyPlayerState,AbilitySystem,AttributeSet);
+		}
+		
+	}
+	
+	
+	
 }

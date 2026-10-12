@@ -49,7 +49,8 @@ class TEST01_API UMyWidgetController : public UObject
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetWidgetControllerParams(const FWidgetControllerParams& Params);
-
+	virtual void BroadcastInitialValues();
+	virtual void BindCallbacksToDependancies();
 protected:
 	/** 所属玩家的 PlayerController，用于控制与输入相关操作 */
 	UPROPERTY(BlueprintReadOnly, Category="WidgetController")

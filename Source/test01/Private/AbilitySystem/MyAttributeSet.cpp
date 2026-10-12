@@ -29,7 +29,7 @@ void UMyAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) co
 // 构造函数：初始化四项属性的默认值为 100
 UMyAttributeSet::UMyAttributeSet()
 {
-	InitHealth(100.f);
+	InitHealth(20.f);
 	InitMaxHealth(100.f);
 	InitMana(100.f);
 	InitMaxMana(100.f);

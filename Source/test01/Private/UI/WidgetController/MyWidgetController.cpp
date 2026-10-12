@@ -11,3 +11,11 @@ void UMyWidgetController::SetWidgetControllerParams(const FWidgetControllerParam
 	AbilitySystemComponent = Params.AbilitySystemComponent;
 	AttributeSet = Params.AttributeSet;
 }
+
+void UMyWidgetController::BroadcastInitialValues()
+{
+}
+
+void UMyWidgetController::BindCallbacksToDependancies()
+{
+}
