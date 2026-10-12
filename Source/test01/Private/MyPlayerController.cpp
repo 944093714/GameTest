@@ -14,17 +14,17 @@ AMyPlayerController::AMyPlayerController()
 {
 	bReplicates = true;   // 允许控制器复制（当前基本为单机用法）
 
-	// 从 /Game/BP/Input 路径静态加载资源（FObjectFinder 在构造期查找资产）
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(TEXT("/Game/BP/Input/IMC_Mapping.IMC_Mapping"));
-	static ConstructorHelpers::FObjectFinder<UInputAction> IAMove(TEXT("/Game/BP/Input/IA_Move.IA_Move"));
-	if (IMC.Succeeded())
-	{
-		MyInputMappingContext = IMC.Object;   // 输入上下文资产
-	}
-	if (IAMove.Succeeded())
-	{
-		MoveAction = IAMove.Object;           // 移动动作资产
-	}
+	// // 从 /Game/BP/Input 路径静态加载资源（FObjectFinder 在构造期查找资产）
+	// static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(TEXT("/Game/BP/Input/IMC_Mapping.IMC_Mapping"));
+	// static ConstructorHelpers::FObjectFinder<UInputAction> IAMove(TEXT("/Game/BP/Input/IA_Move.IA_Move"));
+	// if (IMC.Succeeded())
+	// {
+	// 	MyInputMappingContext = IMC.Object;   // 输入上下文资产
+	// }
+	// if (IAMove.Succeeded())
+	// {
+	// 	MoveAction = IAMove.Object;           // 移动动作资产
+	// }
 }
 
 // 每帧执行：驱动鼠标追踪以更新高亮

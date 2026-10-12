@@ -6,6 +6,10 @@
 #include "GameFramework/HUD.h"
 #include "MyHUD.generated.h"
 
+class UAttributeSet;
+class UAbilitySystemComponent;
+struct FWidgetControllerParams;
+class UOverlayMyWidgetController;
 class UMyUserWidget;
 /**
  * 
@@ -14,17 +18,25 @@ UCLASS()
 class TEST01_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
+
 public:
+	UPROPERTY()
+	TObjectPtr<UMyUserWidget> OverlayWidget;
+
+	UOverlayMyWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& Params);
+
+	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMyUserWidget> OverlayWidgetClass;
 	
 	UPROPERTY()
-	TObjectPtr<UUserWidget> OverlayWidget;
+	TObjectPtr<UOverlayMyWidgetController> OverlayWidgetController;
 	
-protected:
-	
-	virtual void BeginPlay() override;
-	
-private:
-	
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUserWidget> OverlayWidgetClass;
+	UPROPERTY()
+	TSubclassOf<UOverlayMyWidgetController> OverlayWidgetControllerClass;
 };

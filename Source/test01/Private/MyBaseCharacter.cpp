@@ -12,6 +12,7 @@ AMyBaseCharacter::AMyBaseCharacter()
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);   // 武器本身不参与碰撞
 }
+
 void AMyBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
