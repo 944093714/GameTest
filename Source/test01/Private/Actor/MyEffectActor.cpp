@@ -6,6 +6,7 @@
 
 #include "Actor/MyEffectActor.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystem/MyAbilitySystemComponent.h"
@@ -34,34 +35,90 @@ void AMyEffectActor::BeginPlay()
 	
 }
 
-void AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> Effect)
+FActiveGameplayEffectHandle AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> Effect)
 {
-	// IAbilitySystemInterface*ASCInterface = Cast<IAbilitySystemInterface>(Target);
-	// if (ASCInterface)
-	// {
-	// 	ASCInterface->GetAbilitySystemComponent();
-	// }
-	
+	// 通过 GAS 蓝图接口取目标的能力系统组件，拿不到(未实现接口)则直接返回空句柄
 	UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
-	
-	if (TargetAsc == nullptr) return;
-	
+
+	if (TargetAsc == nullptr) return FActiveGameplayEffectHandle();
+
 	// 提前判空：蓝图未设置 Effect 时直接返回，避免空指针崩溃
 	if (!Effect)
 	{
-		return;
+		return FActiveGameplayEffectHandle();
 	}
 
+	// 创建效果上下文，并把"来源"标记为当前 Actor（之后的 IsValid 判断会用到）
 	FGameplayEffectContextHandle EffectContextHandle = TargetAsc->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);
 	FGameplayEffectSpecHandle EffectSpecHandle = TargetAsc->MakeOutgoingSpec(Effect,1.f,EffectContextHandle);
 
-	// MakeOutgoingSpec 可能失败（Data 为空），须二次判空后再解引用
+	FActiveGameplayEffectHandle ActiveHandle;
+	// MakeOutgoingSpec 可能失败（Data 为空），须判空后再解引用
 	if (EffectSpecHandle.IsValid())
 	{
-		TargetAsc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+		// 真正把效果施加到目标身上，拿到唯一句柄供后续"取消效果"使用
+		ActiveHandle = TargetAsc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+
+		// 施加成功则把句柄按目标能力组件分组记录，方便按目标批量取消
+		if (ActiveHandle.IsValid())
+		{
+			ActiveEffectHandles.FindOrAdd(TargetAsc).Handles.Add(ActiveHandle);
+		}
 	}
-	
+
+	return ActiveHandle;
+}
+
+// 取消某目标身上的效果：把之前施加的每个句柄都从目标上移除掉
+void AMyEffectActor::RemoveEffectFromTarget(AActor* TargetActor)
+{
+	UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	if (TargetAsc == nullptr) return;
+
+	// 查找该目标是否确实被本 Actor 施加过效果
+	if (FActiveEffectHandles* EffectHandles = ActiveEffectHandles.Find(TargetAsc))
+	{
+		for (const FActiveGameplayEffectHandle& Handle : EffectHandles->Handles)
+		{
+			// 通过句柄移除指定效果
+			TargetAsc->RemoveActiveGameplayEffect(Handle);
+		}
+		// 移除完毕后清理对应记录，避免句柄残留
+		ActiveEffectHandles.Remove(TargetAsc);
+	}
+}
+
+// 重叠进入：有 Actor 进入触发区时，按"进入时施加"策略分别施加三种效果
+void AMyEffectActor::OnOverlap(AActor* TargetActor)
+{
+	// 普通效果：策略为 ApplyOnOverlay 时才施加
+	if (MyEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
+	{
+		ApplyEffectToTarget(TargetActor,MyEffect);
+	}
+
+	// 限时效果
+	if (MyTimeEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
+	{
+		ApplyEffectToTarget(TargetActor,MyTimeEffect);
+	}
+
+	// 长效效果
+	if (MyLongTimeEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
+	{
+		ApplyEffectToTarget(TargetActor,MyLongTimeEffect);
+	}
+}
+
+// 重叠离开：有 Actor 离开触发区时，按移除策略取消效果，并按需销毁自身
+void AMyEffectActor::OnEndOverlap(AActor* TargetActor)
+{
+	// 移除策略为"离开时移除"才取消施加在目标身上的效果
+	if (RemovePolicy == EEffectRemovealPolicy::RemoveOnEndOverlap)
+	{
+		RemoveEffectFromTarget(TargetActor);
+	}
 }
 
 

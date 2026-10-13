@@ -13,6 +13,40 @@
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
+
+USTRUCT()
+struct FEffectProperties
+{
+	GENERATED_BODY()
+	FEffectProperties();
+	
+	FGameplayEffectContextHandle EffectContextHandle;
+	
+	UPROPERTY()
+	UAbilitySystemComponent* SourceASC = nullptr;
+	
+	UPROPERTY()
+	AActor* SourceAvatarActor = nullptr;
+	
+	UPROPERTY()
+	AController* SourceController = nullptr;
+	
+	UPROPERTY()
+	ACharacter* SourceCharacter = nullptr;
+	
+	UPROPERTY()
+	UAbilitySystemComponent* TargetASC = nullptr;
+	
+	UPROPERTY()
+	AActor* TargetAvatarActor = nullptr;
+	
+	UPROPERTY()
+	AController* TargetController = nullptr;
+	
+	UPROPERTY()
+	ACharacter* TargetCharacter = nullptr;
+	
+};
 /**
  * 属性集类：定义角色的「生命/最大生命/法力/最大法力」四项基础属性。
  * ReplicatedUsing = 属性被复制到客户端时触发对应 OnRep 回调以同步缓存。
@@ -24,7 +58,12 @@ class TEST01_API UMyAttributeSet : public UAttributeSet
 public:
 	UMyAttributeSet();   // 构造函数：初始化四项属性的默认值
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;   // 声明哪些属性参与网络复制
-
+	
+	//前置游戏效果执行
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	//后置游戏效果执行
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+	
 	// 生命值（Vital 关键属性，复制变化时触发 OnRep_Health）
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
 	FGameplayAttributeData Health;
@@ -54,6 +93,8 @@ public:
 	void OnRep_Mana(const FGameplayAttributeData& OldMna) const;
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) const;
-
-
+	
+private:
+	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,FEffectProperties& Props) const;
+	
 };
