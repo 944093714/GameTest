@@ -16,10 +16,10 @@
 // 构造函数：搭建"静态网格根组件 + 球形触发区"的结构
 AMyEffectActor::AMyEffectActor()
 {
-	PrimaryActorTick.bCanEverTick = false;   // 不需要每帧 Tick（事件驱动）
-	
+	PrimaryActorTick.bCanEverTick = false; // 不需要每帧 Tick（事件驱动）
+
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>("SceneRoot"));
-	
+
 	//
 	// Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	// SetRootComponent(Mesh);                  // 静态网格作为根组件
@@ -30,12 +30,10 @@ AMyEffectActor::AMyEffectActor()
 
 void AMyEffectActor::BeginPlay()
 {
-	
-	
-	
 }
 
-FActiveGameplayEffectHandle AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> Effect)
+FActiveGameplayEffectHandle AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor,
+                                                                TSubclassOf<UGameplayEffect> Effect)
 {
 	// 通过 GAS 蓝图接口取目标的能力系统组件，拿不到(未实现接口)则直接返回空句柄
 	UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
@@ -51,7 +49,7 @@ FActiveGameplayEffectHandle AMyEffectActor::ApplyEffectToTarget(AActor* TargetAc
 	// 创建效果上下文，并把"来源"标记为当前 Actor（之后的 IsValid 判断会用到）
 	FGameplayEffectContextHandle EffectContextHandle = TargetAsc->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);
-	FGameplayEffectSpecHandle EffectSpecHandle = TargetAsc->MakeOutgoingSpec(Effect,1.f,EffectContextHandle);
+	FGameplayEffectSpecHandle EffectSpecHandle = TargetAsc->MakeOutgoingSpec(Effect, Levels, EffectContextHandle);
 
 	FActiveGameplayEffectHandle ActiveHandle;
 	// MakeOutgoingSpec 可能失败（Data 为空），须判空后再解引用
@@ -95,19 +93,19 @@ void AMyEffectActor::OnOverlap(AActor* TargetActor)
 	// 普通效果：策略为 ApplyOnOverlay 时才施加
 	if (MyEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
 	{
-		ApplyEffectToTarget(TargetActor,MyEffect);
+		ApplyEffectToTarget(TargetActor, MyEffect);
 	}
 
 	// 限时效果
 	if (MyTimeEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
 	{
-		ApplyEffectToTarget(TargetActor,MyTimeEffect);
+		ApplyEffectToTarget(TargetActor, MyTimeEffect);
 	}
 
 	// 长效效果
 	if (MyLongTimeEffectPolicy == EEffectApplicationPolicy::ApplyOnOverlay)
 	{
-		ApplyEffectToTarget(TargetActor,MyLongTimeEffect);
+		ApplyEffectToTarget(TargetActor, MyLongTimeEffect);
 	}
 }
 
@@ -156,6 +154,3 @@ void AMyEffectActor::OnEndOverlap(AActor* TargetActor)
 // 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AMyEffectActor::OnOverlap);
 // 	Sphere->OnComponentEndOverlap.AddDynamic(this, &AMyEffectActor::EndOverlap);
 // }
-
-
-

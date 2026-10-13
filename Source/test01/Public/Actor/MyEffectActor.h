@@ -102,4 +102,8 @@ protected:
 	// 记录已施加到目标身上的效果句柄，按"目标能力组件"分组，供 RemoveEffectFromTarget 取消时使用
 	UPROPERTY()
 	TMap<TWeakObjectPtr<UAbilitySystemComponent>, FActiveEffectHandles> ActiveEffectHandles;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Applied Effect")
+	float Levels = 1.f;
 };
