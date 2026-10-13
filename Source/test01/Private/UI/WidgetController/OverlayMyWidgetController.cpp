@@ -10,8 +10,12 @@ void UOverlayMyWidgetController::BroadcastInitialValues()
 {
 	const UMyAttributeSet* MyAttributeSet = Cast<UMyAttributeSet>(AttributeSet);
 
-	OnHealthChanged.Broadcast(MyAttributeSet->GetHealth());
+	// 注意广播顺序：先「最大值」再「当前值」，保证血条/蓝条在算百分比时最大值已就位
 	OnMaxHealthChanged.Broadcast(MyAttributeSet->GetMaxHealth());
+	OnHealthChanged.Broadcast(MyAttributeSet->GetHealth());
+
+	OnMaxManaChanged.Broadcast(MyAttributeSet->GetMaxMana());
+	OnManaChanged.Broadcast(MyAttributeSet->GetMana());
 }
 
 // 订阅依赖：把 GAS 中 Health / MaxHealth 属性的“变化委托”挂到本控制器的回调上，
@@ -27,6 +31,12 @@ void UOverlayMyWidgetController::BindCallbacksToDependancies()
 	// 最大生命值变化 → MaxHealthChanged
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		MyAttributeSet->GetMaxHealthAttribute()).AddUObject(this, &UOverlayMyWidgetController::MaxHealthChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		MyAttributeSet->GetManaAttribute()).AddUObject(this, &UOverlayMyWidgetController::ManaChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		MyAttributeSet->GetMaxManaAttribute()).AddUObject(this, &UOverlayMyWidgetController::MaxManaChanged);
 
 }
 
@@ -41,3 +51,14 @@ void UOverlayMyWidgetController::MaxHealthChanged(const FOnAttributeChangeData& 
 {
 	OnMaxHealthChanged.Broadcast(Data.NewValue);
 }
+
+void UOverlayMyWidgetController::ManaChanged(const FOnAttributeChangeData& Data) const
+{
+	OnManaChanged.Broadcast(Data.NewValue);
+}
+
+void UOverlayMyWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data) const
+{
+	OnMaxManaChanged.Broadcast(Data.NewValue);
+}
+

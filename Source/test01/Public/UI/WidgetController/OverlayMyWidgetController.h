@@ -7,13 +7,15 @@
 #include "OverlayMyWidgetController.generated.h"
 
 struct FOnAttributeChangeData;
-// ===== HUD 覆盖层（Overlay）专用的动态多播委托 =====
+// ===== HUD 覆盖层（Overlay）专用的动态多播委托 声明委托 =====
 // 每声明一个「属性 → UI」的转发事件：当某属性变化时，由控制器把新值广播给绑定的蓝图控件。
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature,float,Health);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature,float,MaxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, Health);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChangedSignature,float,Mana);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature,float,MaxMana);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, float, MaxHealth);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChangedSignature, float, Mana);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature, float, MaxMana);
 
 /**
  * 覆盖层（Overlay HUD）控件控制器。
@@ -27,6 +29,7 @@ UCLASS(BlueprintType, Blueprintable)
 class TEST01_API UOverlayMyWidgetController : public UMyWidgetController
 {
 	GENERATED_BODY()
+
 public:
 	/** 向 UI 广播各项属性的初始值（控件首次打开时调用） */
 	virtual void BroadcastInitialValues() override;
@@ -34,12 +37,18 @@ public:
 	virtual void BindCallbacksToDependancies() override;
 
 	/** 生命值变化时触发，携带最新生命值（BlueprintAssignable 便于在蓝图里绑定 UI） */
-	UPROPERTY(BlueprintAssignable,Category="GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnHealthChangedSignature OnHealthChanged;
 
 	/** 最大生命值变化时触发，携带最新最大生命值 */
-	UPROPERTY(BlueprintAssignable,Category="GAS|Attributes")
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnMaxHealthChangedSignature OnMaxHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
+	FOnManaChangedSignature OnManaChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
+	FOnMaxManaChangedSignature OnMaxManaChanged;
 
 protected:
 	/** 生命值变化回调：收到 GAS 新值后转发到 OnHealthChanged 委托 */
@@ -47,4 +56,6 @@ protected:
 	/** 最大生命值变化回调：转发到 OnMaxHealthChanged 委托 */
 	void MaxHealthChanged(const FOnAttributeChangeData& Data) const;
 
+	void ManaChanged(const FOnAttributeChangeData& Data) const;
+	void MaxManaChanged(const FOnAttributeChangeData& Data) const;
 };

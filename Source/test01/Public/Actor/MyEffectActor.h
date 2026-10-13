@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MyEffectActor.generated.h"
 
-class USphereComponent;
+class UGameplayEffect;
 
 /**
  * 区域效果 Actor（暂为临时实现，见 OnOverlap 内的 TODO）
@@ -21,21 +21,12 @@ class TEST01_API AMyEffectActor : public AActor
 public:
 	AMyEffectActor();
 
-	// 重叠开始回调：有 Actor 进入球体时触发
-	UFUNCTION()
-	virtual void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	// 重叠结束回调：有 Actor 离开球体时触发
-	UFUNCTION()
-	virtual void EndOverlap(UPrimitiveComponent* OnComponentEndOverlap, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 protected:
 	virtual void BeginPlay() override;
-private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USphereComponent> Sphere;        // 球形重叠触发区（用于检测进入的角色）
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> Mesh;      // 静态网格（作为可视化外观 / 根组件）
-
+	
+	UFUNCTION(BlueprintCallable)
+	void ApplyEffectToTarget(AActor* Target,TSubclassOf<UGameplayEffect> Effect);
+	
+	UPROPERTY(EditAnywhere,Category="Applied Effects")
+	TSubclassOf<UGameplayEffect> MyEffect;
 };
