@@ -34,7 +34,7 @@ void AMyEffectActor::BeginPlay()
 	
 }
 
-void AMyEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEffect> Effect)
+void AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> Effect)
 {
 	// IAbilitySystemInterface*ASCInterface = Cast<IAbilitySystemInterface>(Target);
 	// if (ASCInterface)
@@ -42,14 +42,25 @@ void AMyEffectActor::ApplyEffectToTarget(AActor* Target, TSubclassOf<UGameplayEf
 	// 	ASCInterface->GetAbilitySystemComponent();
 	// }
 	
-	UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+	UAbilitySystemComponent* TargetAsc = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	
 	if (TargetAsc == nullptr) return;
 	
+	// 提前判空：蓝图未设置 Effect 时直接返回，避免空指针崩溃
+	if (!Effect)
+	{
+		return;
+	}
+
 	FGameplayEffectContextHandle EffectContextHandle = TargetAsc->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);
 	FGameplayEffectSpecHandle EffectSpecHandle = TargetAsc->MakeOutgoingSpec(Effect,1.f,EffectContextHandle);
-	TargetAsc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+
+	// MakeOutgoingSpec 可能失败（Data 为空），须二次判空后再解引用
+	if (EffectSpecHandle.IsValid())
+	{
+		TargetAsc->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
+	}
 	
 }
 

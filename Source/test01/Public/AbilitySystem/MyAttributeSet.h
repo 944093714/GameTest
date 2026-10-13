@@ -22,7 +22,7 @@ class TEST01_API UMyAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
-	UMyAttributeSet();
+	UMyAttributeSet();   // 构造函数：初始化四项属性的默认值
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;   // 声明哪些属性参与网络复制
 
 	// 生命值（Vital 关键属性，复制变化时触发 OnRep_Health）
@@ -31,17 +31,17 @@ public:
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Health);
 
 	// 最大生命
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Vital Attributes")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxHealth);
 
 	// 法力
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Vital Attributes")
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Mana);
 
 	// 最大法力
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Vital Attributes")
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxMana);
 

@@ -24,7 +24,7 @@ public:
 
 	AMyEnemy();
 protected:
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() override;   // 出生后初始化自有的 GAS(ActorInfo 绑定)与状态
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool IsHighlighted;   // 是否处于高亮状态（可在蓝图中读取/编辑）
 

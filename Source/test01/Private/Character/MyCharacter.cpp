@@ -54,13 +54,15 @@ void AMyCharacter::SetPlayerInfo()
 	AbilitySystem = MyPlayerState->GetAbilitySystemComponent();
 	AttributeSet  = MyPlayerState->GetAttributeSet();
 	
+	// 通过 PlayerController 拿到 HUD，初始化血条/蓝条等覆盖层 UI（传递 GAS 数据供绑定）
 	if (AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(GetController()))
 	{
 		if (AMyHUD * MyHUD = Cast<AMyHUD>(MyPlayerController->GetHUD()))
 		{
+			// 用控制器/玩家状态/ASC/属性集初始化 HUD 的覆盖层(血条)界面
 			MyHUD->InitOverlay(MyPlayerController,MyPlayerState,AbilitySystem,AttributeSet);
 		}
-		
+
 	}
 	
 	

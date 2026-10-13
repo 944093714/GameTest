@@ -44,9 +44,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnMaxHealthChangedSignature OnMaxHealthChanged;
 
+	/** 法力值变化时触发，携带最新法力值（BlueprintAssignable 便于在蓝图里绑定 UI） */
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnManaChangedSignature OnManaChanged;
 
+	/** 最大法力值变化时触发，携带最新最大法力值 */
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnMaxManaChangedSignature OnMaxManaChanged;
 
@@ -55,7 +57,8 @@ protected:
 	void HealthChanged(const FOnAttributeChangeData& Data) const;
 	/** 最大生命值变化回调：转发到 OnMaxHealthChanged 委托 */
 	void MaxHealthChanged(const FOnAttributeChangeData& Data) const;
-
+	/** 法力值变化回调：转发到 OnManaChanged 委托 */
 	void ManaChanged(const FOnAttributeChangeData& Data) const;
+	/** 最大法力值变化回调：转发到 OnMaxManaChanged 委托 */
 	void MaxManaChanged(const FOnAttributeChangeData& Data) const;
 };

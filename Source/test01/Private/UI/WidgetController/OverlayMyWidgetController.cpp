@@ -14,6 +14,7 @@ void UOverlayMyWidgetController::BroadcastInitialValues()
 	OnMaxHealthChanged.Broadcast(MyAttributeSet->GetMaxHealth());
 	OnHealthChanged.Broadcast(MyAttributeSet->GetHealth());
 
+	// 先广播法力最大值再广播当前法力值，保证百分比计算时最大值已就位
 	OnMaxManaChanged.Broadcast(MyAttributeSet->GetMaxMana());
 	OnManaChanged.Broadcast(MyAttributeSet->GetMana());
 }
@@ -31,10 +32,12 @@ void UOverlayMyWidgetController::BindCallbacksToDependancies()
 	// 最大生命值变化 → MaxHealthChanged
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		MyAttributeSet->GetMaxHealthAttribute()).AddUObject(this, &UOverlayMyWidgetController::MaxHealthChanged);
-	
+
+	// 法力值变化 → ManaChanged
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		MyAttributeSet->GetManaAttribute()).AddUObject(this, &UOverlayMyWidgetController::ManaChanged);
-	
+
+	// 最大法力值变化 → MaxManaChanged
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		MyAttributeSet->GetMaxManaAttribute()).AddUObject(this, &UOverlayMyWidgetController::MaxManaChanged);
 
@@ -52,11 +55,13 @@ void UOverlayMyWidgetController::MaxHealthChanged(const FOnAttributeChangeData& 
 	OnMaxHealthChanged.Broadcast(Data.NewValue);
 }
 
+// 法力值变化回调：把 GAS 里的新值转发到 OnManaChanged 委托
 void UOverlayMyWidgetController::ManaChanged(const FOnAttributeChangeData& Data) const
 {
 	OnManaChanged.Broadcast(Data.NewValue);
 }
 
+// 最大法力值变化回调：转发到 OnMaxManaChanged 委托
 void UOverlayMyWidgetController::MaxManaChanged(const FOnAttributeChangeData& Data) const
 {
 	OnMaxManaChanged.Broadcast(Data.NewValue);

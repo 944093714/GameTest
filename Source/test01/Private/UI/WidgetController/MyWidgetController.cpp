@@ -6,6 +6,7 @@
 
 void UMyWidgetController::SetWidgetControllerParams(const FWidgetControllerParams& Params)
 {
+	// 把参数包中的四项数据依次赋值给本控制器的成员
 	PlayerController = Params.PlayerController;
 	PlayerState = Params.PlayerState;
 	AbilitySystemComponent = Params.AbilitySystemComponent;
