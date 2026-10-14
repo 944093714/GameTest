@@ -3,22 +3,22 @@
 
 #include "MyBaseCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/MyAbilitySystemComponent.h"
 // 构造函数：创建绑定到右手骨骼插槽的武器子对象
 AMyBaseCharacter::AMyBaseCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;   // 允许每帧 Tick（便于后续扩展）
+	PrimaryActorTick.bCanEverTick = true; // 允许每帧 Tick（便于后续扩展）
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	// 把武器挂到骨骼网格的"右手握把"插槽上
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
-	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);   // 武器本身不参与碰撞
+	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 武器本身不参与碰撞
 }
 
 void AMyBaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	// 目前暂无额外逻辑（子类可覆写扩展）
-
 }
 
 // 实现 IAbilitySystemInterface：返回本角色绑定好的 GAS 组件（供系统/技能直接获取）
@@ -34,10 +34,22 @@ void AMyBaseCharacter::InitializePrimaryAttributes() const
 	// 1. 为该角色创建一个效果上下文（记录来源/施法者信息）
 	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
 	// 2. 用 DefaultPrimaryAttributes 指定的 GE 生成一个 1 级的 OutgoingSpec（还没生效，只是规格）
-	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(DefaultPrimaryAttributes,1.f,ContextHandle);
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(
+		DefaultPrimaryAttributes, 1.f, ContextHandle);
 	// 3. 把该 Spec 应用到自己身上，触发属性初始写入（需判空 Data，避免异常）
 	if (SpecHandle.IsValid())
 	{
-		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(),GetAbilitySystemComponent());
+		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(),
+		                                                             GetAbilitySystemComponent());
 	}
+}
+
+void AMyBaseCharacter::AddCharacterAbilities() const
+{
+	
+	UMyAbilitySystemComponent* MyASC = CastChecked<UMyAbilitySystemComponent>(AbilitySystem);
+	if (!HasAuthority()) return;
+	
+	MyASC->AddCharacterAbilities(StartupAbilities);
+	
 }

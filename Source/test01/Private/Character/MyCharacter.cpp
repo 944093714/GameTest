@@ -34,7 +34,7 @@ void AMyCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	SetPlayerInfo();   // 服务器端初始化
-	
+	AddCharacterAbilities();
 }
 
 // 客户端：PlayerState 在客户端被复制并到达后触发 → 同样初始化 GAS 信息
