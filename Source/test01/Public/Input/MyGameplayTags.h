@@ -3,34 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
-#include "GameplayTagContainer.h"
-#include "MyGameplayTags.generated.h"
+#include "NativeGameplayTags.h"
 
 /**
- * 基于 Native GameplayTag 的标签集合，集中管理输入/技能标签。
- * 在游戏加载早期（如模块 StartupModule 或 GameInstance::Init）调用
- * InitializeNativeGameplayTags() 完成注册，之后通过 Get() 全局引用。
+ * 集中管理的 Native GameplayTags（UE 官方宏，GAS/Lyra 通用做法）。
+ * 每个标签是一个 FGameplayTag 全局常量，在 cpp 里用 UE_DEFINE_GAMEPLAY_TAG
+ * 声明并自动注册（无需手动调用初始化）。使用处直接写标签名即可。
  */
-struct FMyGameplayTags
-{
-public:
-	static const FMyGameplayTags& Get() { return GameplayTags; }
-	static void InitializeNativeGameplayTags();
-
-	FGameplayTag InputTag_LMB;
-	FGameplayTag InputTag_RMB;
-	FGameplayTag InputTag_1;
-	FGameplayTag InputTag_2;
-	FGameplayTag InputTag_3;
-	FGameplayTag InputTag_4;
-
-private:
-	static FMyGameplayTags GameplayTags;
-};
-
-UCLASS()
-class TEST01_API UMyGameplayTags : public UDataAsset
-{
-	GENERATED_BODY()
-};
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_LMB)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_RMB)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_1)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_2)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_3)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_4)

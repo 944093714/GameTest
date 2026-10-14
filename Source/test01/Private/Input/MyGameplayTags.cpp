@@ -2,22 +2,11 @@
 
 
 #include "Input/MyGameplayTags.h"
-#include "GameplayTagsManager.h"
 
-FMyGameplayTags FMyGameplayTags::GameplayTags;
-
-void FMyGameplayTags::InitializeNativeGameplayTags()
-{
-	// Lambda 便于批量声明原生标签，避免重复注册
-	auto AddNativeTag = [](FGameplayTag& OutTag, const TCHAR* TagName, const FString& TagComment)
-	{
-		OutTag = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TagName), TagComment);
-	};
-
-	AddNativeTag(GameplayTags.InputTag_LMB, TEXT("InputTag.LMB"), TEXT("鼠标左键"));
-	AddNativeTag(GameplayTags.InputTag_RMB, TEXT("InputTag.RMB"), TEXT("鼠标右键"));
-	AddNativeTag(GameplayTags.InputTag_1, TEXT("InputTag.1"), TEXT("数字键1"));
-	AddNativeTag(GameplayTags.InputTag_2, TEXT("InputTag.2"), TEXT("数字键2"));
-	AddNativeTag(GameplayTags.InputTag_3, TEXT("InputTag.3"), TEXT("数字键3"));
-	AddNativeTag(GameplayTags.InputTag_4, TEXT("InputTag.4"), TEXT("数字键4"));
-}
+// 定义并自动注册为 native 标签（TagForm 用点做层级分隔，Comment 为注释）
+UE_DEFINE_GAMEPLAY_TAG(InputTag_LMB, "InputTag.LMB", "鼠标左键")
+UE_DEFINE_GAMEPLAY_TAG(InputTag_RMB, "InputTag.RMB", "鼠标右键")
+UE_DEFINE_GAMEPLAY_TAG(InputTag_1, "InputTag.1", "数字键1")
+UE_DEFINE_GAMEPLAY_TAG(InputTag_2, "InputTag.2", "数字键2")
+UE_DEFINE_GAMEPLAY_TAG(InputTag_3, "InputTag.3", "数字键3")
+UE_DEFINE_GAMEPLAY_TAG(InputTag_4, "InputTag.4", "数字键4")
