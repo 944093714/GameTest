@@ -39,31 +39,38 @@ FEffectProperties::FEffectProperties()
 {
 }
 
+// 从效果回调数据中提取"来源方"与"目标方"的关键信息，填充到 Props 中
+// 用途：把 GAS 底层的 TArray(Data) 打散成易用的结构体(来源/目标 的 ASC、Actor、Controller、Character)
 void UMyAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbackData& Data,FEffectProperties& Props) const
 {
+	// —— 来源方(施法者)：从效果上下文向上追溯到原始施法者的 ASC ——
 	Props.EffectContextHandle = Data.EffectSpec.GetContext();
 	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 
+	// 来源 ASC 已初始化并有效时，再取出其 AvatarActor 与 PlayerController
 	if (IsValid(Props.SourceASC) && Props.SourceASC->AbilityActorInfo.IsValid() && Props.SourceASC->AbilityActorInfo->AvatarActor.IsValid())
 	{
 		Props.SourceAvatarActor = Props.SourceASC->AbilityActorInfo->AvatarActor.Get();
 		Props.SourceController = Props.SourceASC->AbilityActorInfo->PlayerController.Get();
-		
+
+		// 有些来源(如子类/召唤物)没有直接控制器，退回从 Pawn 身上反取控制器
 		if (Props.SourceController == nullptr && Props.SourceAvatarActor != nullptr)
 		{
-			if (const APawn* Pawn = Cast<APawn>(Props.SourceController))
+			if (const APawn* Pawn = Cast<APawn>(Props.SourceAvatarActor))
 			{
 				Props.SourceController = Pawn->GetController();
 			}
 		}
 
+		// 有控制器则进一步拿到来源角色
 		if (Props.SourceController)
 		{
 			Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
 		}
 	}
 
-	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo.IsValid())
+	// —— 目标方(受影响者)：直接从 Data.Target 读取 AvatarActor / Controller ——
+	if (Data.Target.AbilityActorInfo.IsValid())
 	{
 		Props.TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get();
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
@@ -72,7 +79,7 @@ void UMyAttributeSet::SetEffectProperties(const struct FGameplayEffectModCallbac
 	}
 }
 
-// 构造函数：初始化四项属性的默认值为 100
+// 构造函数：在此给属性设初始值（Strength 这类主动型属性默认从 0 开始，由等级/GE 后续装配）
 UMyAttributeSet::UMyAttributeSet()
 {
 	InitHealth(50.f);
@@ -81,16 +88,17 @@ UMyAttributeSet::UMyAttributeSet()
 	InitMaxMana(100.f);
 }
 
-// 声明可复制属性：无条件复制，任何变化都通知
+// 声明可复制属性：无条件复制，任何变化都收到通知(REPNOTIFY_Always)
 void UMyAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	// 副本类属性(血/蓝，直接决定生存)，变化实时同步
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
-	
+	// 主属性(力量等)，同样参与复制，供战斗计算使用
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, Strength, COND_None, REPNOTIFY_Always);
 }
 

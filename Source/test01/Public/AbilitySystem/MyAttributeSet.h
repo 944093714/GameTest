@@ -14,37 +14,36 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+// 效果回调的属性提取结果：把一次 GE 变化涉及到的「来源方」与「目标方」信息打包存放
+// 由 SetEffectProperties() 填充后交给后续逻辑(伤害计算/表现)统一使用
 USTRUCT()
 struct FEffectProperties
 {
 	GENERATED_BODY()
 	FEffectProperties();
 
+	// 本次效果上下文（可追溯原始施法者的 ASC）
 	FGameplayEffectContextHandle EffectContextHandle;
 
+	// —— 来源方(施法者) ——
 	UPROPERTY()
-	UAbilitySystemComponent* SourceASC = nullptr;
+	UAbilitySystemComponent* SourceASC = nullptr;   // 施法者能力组件
+	UPROPERTY()
+	AActor* SourceAvatarActor = nullptr;            // 施法者外观/载体 Actor
+	UPROPERTY()
+	AController* SourceController = nullptr;        // 施法者控制器
+	UPROPERTY()
+	ACharacter* SourceCharacter = nullptr;          // 施法者角色(若有)
 
+	// —— 目标方(受影响者) ——
 	UPROPERTY()
-	AActor* SourceAvatarActor = nullptr;
-
+	UAbilitySystemComponent* TargetASC = nullptr;   // 目标能力组件
 	UPROPERTY()
-	AController* SourceController = nullptr;
-
+	AActor* TargetAvatarActor = nullptr;            // 目标外观/载体 Actor
 	UPROPERTY()
-	ACharacter* SourceCharacter = nullptr;
-
+	AController* TargetController = nullptr;        // 目标控制器
 	UPROPERTY()
-	UAbilitySystemComponent* TargetASC = nullptr;
-
-	UPROPERTY()
-	AActor* TargetAvatarActor = nullptr;
-
-	UPROPERTY()
-	AController* TargetController = nullptr;
-
-	UPROPERTY()
-	ACharacter* TargetCharacter = nullptr;
+	ACharacter* TargetCharacter = nullptr;          // 目标角色(若有)
 };
 
 /**
@@ -66,6 +65,7 @@ public:
 	//后置游戏效果执行
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
+	// 力量（主属性，参与战斗/伤害计算；复制变化时触发 OnRep_Strength）
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "primary Attributes")
 	FGameplayAttributeData Strength;
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Strength);
@@ -106,5 +106,6 @@ public:
 	
 
 private:
+	// 从效果回调数据中提取来源/目标的 ASC、Actor、Controller、Character 等，填充到 Props
 	void SetEffectProperties(const struct FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 };

@@ -21,14 +21,23 @@ void AMyBaseCharacter::BeginPlay()
 
 }
 
+// 实现 IAbilitySystemInterface：返回本角色绑定好的 GAS 组件（供系统/技能直接获取）
 UAbilitySystemComponent* AMyBaseCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystem;
 }
 
+// 初始化角色的基础属性：把"初始属性 GE"施加到自身，一次性写入生命/法力等默认值
+// 通常在 BeginPlay 或组件就绪后调用一次
 void AMyBaseCharacter::InitializePrimaryAttributes() const
 {
+	// 1. 为该角色创建一个效果上下文（记录来源/施法者信息）
 	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	// 2. 用 DefaultPrimaryAttributes 指定的 GE 生成一个 1 级的 OutgoingSpec（还没生效，只是规格）
 	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(DefaultPrimaryAttributes,1.f,ContextHandle);
-	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(),GetAbilitySystemComponent());
+	// 3. 把该 Spec 应用到自己身上，触发属性初始写入（需判空 Data，避免异常）
+	if (SpecHandle.IsValid())
+	{
+		GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(),GetAbilitySystemComponent());
+	}
 }
