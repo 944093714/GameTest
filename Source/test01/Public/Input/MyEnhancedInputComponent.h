@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
+#include "MyInputConfig.h"
 #include "MyEnhancedInputComponent.generated.h"
 
-#include "MyInputConfig.h"
+
 /**
  * 
  */

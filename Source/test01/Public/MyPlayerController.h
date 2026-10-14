@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "MyInterface.h"
 #include "MyPlayerController.generated.h"
+struct FGameplayTag;
+class UMyInputConfig;
 class UInputMappingContext;      // 前置声明：增强输入上下文
 class UInputAction;              // 前置声明：输入动作
 struct FInputActionValue;        // 前置声明：输入动作读取的数值
@@ -40,4 +42,12 @@ private:
 
 	IMyInterface* LastActor;   // 上一帧命中的接口对象
 	IMyInterface* ThisActor;   // 当前帧命中的接口对象
+	
+	
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
+	
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	TObjectPtr<UMyInputConfig> MyInputConfig;
 };

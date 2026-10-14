@@ -8,6 +8,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Character/MyEnemy.h"
+#include "Input/MyEnhancedInputComponent.h"
 
 // 构造函数：bReplicates 允许网络复制，并从内容资源加载增强输入配置
 AMyPlayerController::AMyPlayerController()
@@ -74,6 +75,24 @@ void AMyPlayerController::CursorTrace()
 	}
 }
 
+void AMyPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
+
+}
+
+void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
+
+}
+
+void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
+
+}
+
 // 游戏开始：注册输入映射上下文、显示鼠标光标、设置"游戏+UI"混合输入模式
 void AMyPlayerController::BeginPlay()
 {
@@ -82,8 +101,7 @@ void AMyPlayerController::BeginPlay()
 	check(MyInputMappingContext); // 校验输入上下文已加载成功
 
 	// 获取本地玩家子系统并注册映射上下文（优先级 0）
-	UEnhancedInputLocalPlayerSubsystem* Subsystem =
-		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 
 	if (Subsystem != nullptr)
 	{
@@ -107,9 +125,14 @@ void AMyPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	// PlayerController 的 InputComponent 是增强输入组件
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+	//UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);改为使用自己的增强输入系统
+	UMyEnhancedInputComponent* EnhancedInputComponent = CastChecked<UMyEnhancedInputComponent>(InputComponent);
+	
 	// 动作每次数值变化(Triggered)时调用 Move
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::Move);
+	
+	EnhancedInputComponent->BindAbilityActions(MyInputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHeld);
+	
 }
 
 // 移动处理：将 2D 输入轴量转为相对视角(仅 Yaw)的前/右方向输入
