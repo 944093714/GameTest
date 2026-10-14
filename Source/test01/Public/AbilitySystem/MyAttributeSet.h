@@ -66,6 +66,10 @@ public:
 	//后置游戏效果执行
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "primary Attributes")
+	FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(UMyAttributeSet, Strength);
+	
 	// 生命值（Vital 关键属性，复制变化时触发 OnRep_Health）
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Vital Attributes")
 	FGameplayAttributeData Health;
@@ -87,6 +91,7 @@ public:
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxMana);
 
 	// 各属性的复制通知回调（收到新值时把 GAS 内部缓存同步到最新）
+	
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
 	UFUNCTION()
@@ -96,6 +101,8 @@ public:
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) const;
 
+	UFUNCTION()
+	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
 	
 
 private:

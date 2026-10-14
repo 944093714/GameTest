@@ -25,7 +25,7 @@ public:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystem;   // 玩家 GAS 组件
 
 	UPROPERTY()

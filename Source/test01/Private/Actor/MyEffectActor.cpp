@@ -28,10 +28,6 @@ AMyEffectActor::AMyEffectActor()
 	// Sphere->SetupAttachment(GetRootComponent());   // 球体挂在根组件下作为触发区
 }
 
-void AMyEffectActor::BeginPlay()
-{
-}
-
 FActiveGameplayEffectHandle AMyEffectActor::ApplyEffectToTarget(AActor* TargetActor,
                                                                 TSubclassOf<UGameplayEffect> Effect)
 {

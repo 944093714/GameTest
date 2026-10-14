@@ -10,7 +10,7 @@
 
 class UAbilitySystemComponent;
 class UAttributeSet;
-
+class UGameplayEffect;
 /**
  * 角色基类
  * 同时继承 ACharacter(运动/骨骼网格) 与 IAbilitySystemInterface(暴露 GAS 组件)。
@@ -36,4 +36,9 @@ protected:
 	// 属性集(同上，来源因类而异)
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category = "Attributes")
+	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
+	
+	void InitializePrimaryAttributes() const;
 };

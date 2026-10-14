@@ -2,6 +2,7 @@
 
 
 #include "MyBaseCharacter.h"
+#include "AbilitySystemComponent.h"
 // 构造函数：创建绑定到右手骨骼插槽的武器子对象
 AMyBaseCharacter::AMyBaseCharacter()
 {
@@ -23,4 +24,11 @@ void AMyBaseCharacter::BeginPlay()
 UAbilitySystemComponent* AMyBaseCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystem;
+}
+
+void AMyBaseCharacter::InitializePrimaryAttributes() const
+{
+	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(DefaultPrimaryAttributes,1.f,ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(),GetAbilitySystemComponent());
 }

@@ -29,6 +29,11 @@ void UMyAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& MaxOldMana) co
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UMyAttributeSet, MaxMana, MaxOldMana);
 }
 
+void UMyAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UMyAttributeSet, Strength, OldStrength);
+}
+
 // 默认构造函数定义：成员已在头文件里给了默认值(= nullptr 等)，这里只需空实现让链接通过
 FEffectProperties::FEffectProperties()
 {
@@ -85,6 +90,8 @@ void UMyAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+	
+	DOREPLIFETIME_CONDITION_NOTIFY(UMyAttributeSet, Strength, COND_None, REPNOTIFY_Always);
 }
 
 // 属性变化前回调：把即将写入的新值限制在合理范围内，防止血/蓝越界(负数、超过上限)

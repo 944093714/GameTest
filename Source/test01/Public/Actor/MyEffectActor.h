@@ -48,7 +48,6 @@ public:
 	AMyEffectActor();
 
 protected:
-	virtual void BeginPlay() override;
 
 	// 将指定的 GameplayEffect 施加到目标 Actor 上，返回效果句柄（用于之后取消）
 	UFUNCTION(BlueprintCallable)
@@ -61,7 +60,7 @@ protected:
 	// 重叠回调：有 Actor 进入触发区时调用
 	UFUNCTION(BlueprintCallable)
 	void OnOverlap(AActor* TargetActor);
-
+	
 	// 重叠结束回调：有 Actor 离开触发区时调用
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
