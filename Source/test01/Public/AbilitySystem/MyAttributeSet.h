@@ -8,6 +8,9 @@
 #include "MyAttributeSet.generated.h"
 
 // 便捷宏：为每个属性自动生成「属性获取器 / 值获取 / 值设置 / 值初始化」四类访问函数
+// 展开后得到：Get{Property}(ASC名)、Get{Property}Attribute()、Set{Property}(新值)、Init{Property}(初值)
+// 例如本类的 Strength 属性通过 ATTRIBUTE_ACCESSORS(UMyAttributeSet, Strength) 生成
+//   GetStrength() / GetStrengthAttribute() / SetStrength(Value) / InitStrength(Value) 四个函数。
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
@@ -57,12 +60,14 @@ class TEST01_API UMyAttributeSet : public UAttributeSet
 
 public:
 	UMyAttributeSet(); // 构造函数：初始化四项属性的默认值
+	// 网络复制相关：声明哪些属性参与复制，并指定复制条件与变化通知方式
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	// 声明哪些属性参与网络复制
 
 	//前置游戏效果执行
+	// 当某个属性要写入新值前触发。此时 GE 尚未真正修改属性，可在这里把 NewValue 约束到合法范围(如血/蓝不为负、不超上限)
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	//后置游戏效果执行
+	// 效果已真正写入属性后触发。此时可拿到最终数值进行收尾与派生逻辑(如根据伤害结算换算、触发表现等)
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 	// 力量（主属性，参与战斗/伤害计算；复制变化时触发 OnRep_Strength）
@@ -91,6 +96,8 @@ public:
 	ATTRIBUTE_ACCESSORS(UMyAttributeSet, MaxMana);
 
 	// 各属性的复制通知回调（收到新值时把 GAS 内部缓存同步到最新）
+	// 均以 ReplicatedUsing 绑定到对应 UPROPERTY，客户端收到属性更新时自动调用；
+	// 参数为旧的属性数据(未启用完整复制环境时仅作占位)，用于对比新旧值
 	
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;

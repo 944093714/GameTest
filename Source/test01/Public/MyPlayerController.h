@@ -44,10 +44,14 @@ private:
 	IMyInterface* ThisActor;   // 当前帧命中的接口对象
 	
 	
+	// 能力输入回调：当绑定了对应能力标签的按键被「按下」时触发
 	void AbilityInputTagPressed(FGameplayTag InputTag);
+	// 能力输入回调：当绑定了对应能力标签的按键被「松开」时触发
 	void AbilityInputTagReleased(FGameplayTag InputTag);
+	// 能力输入回调：当绑定了对应能力标签的按键被「持续按住」时触发
 	void AbilityInputTagHeld(FGameplayTag InputTag);
-	
+
+	// 自定义输入配置资产：用于把按键动作绑定到对应的能力标签(InputTag)
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UMyInputConfig> MyInputConfig;
 };

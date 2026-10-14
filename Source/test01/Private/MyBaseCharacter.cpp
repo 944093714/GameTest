@@ -46,10 +46,10 @@ void AMyBaseCharacter::InitializePrimaryAttributes() const
 
 void AMyBaseCharacter::AddCharacterAbilities() const
 {
-	
+	// 把通用 GAS 组件强转成项目自有类型（需要其中的自定义技能接口）
 	UMyAbilitySystemComponent* MyASC = CastChecked<UMyAbilitySystemComponent>(AbilitySystem);
-	if (!HasAuthority()) return;
-	
+	if (!HasAuthority()) return;   // 技能授予只在服务器端执行，客户端直接跳过
+
+	// 调用 AS 组件接口，把 StartupAbilities 配置的技能批量授予本角色
 	MyASC->AddCharacterAbilities(StartupAbilities);
-	
 }

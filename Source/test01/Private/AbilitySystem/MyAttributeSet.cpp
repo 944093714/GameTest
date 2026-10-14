@@ -135,10 +135,12 @@ void UMyAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 void UMyAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
-	
+
+	// 一次性提取本次效果对应的「来源方/目标方」关键信息，供后续伤害/表现逻辑统一使用
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 	
+	// —— 以下为历史遗留的展开写法(已被上方 SetEffectProperties 封装取代)，保留供对照参考 ——
 	// FGameplayEffectContextHandle EffectContextHandle = Data.EffectSpec.GetContext();
 	// UAbilitySystemComponent* SourceASC = EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent();
 	//

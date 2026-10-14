@@ -17,6 +17,7 @@ AMyPlayerState::AMyPlayerState()
 	AttributeSet = CreateDefaultSubobject<UMyAttributeSet>("MyAttributeSet");
 }
 
+// 实现 IAbilitySystemInterface：向外部(如角色/技能)提供本玩家的 GAS 组件
 UAbilitySystemComponent* AMyPlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystem;

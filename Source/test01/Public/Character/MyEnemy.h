@@ -22,7 +22,7 @@ public:
 	virtual void UnHighlightActor() override;    // 鼠标移开 → 取消高亮
 	//敌人接口结束
 
-	AMyEnemy();
+	AMyEnemy();                                      // 构造函数：创建敌人自有的 GAS 组件与属性集
 protected:
 	virtual void BeginPlay() override;   // 出生后初始化自有的 GAS(ActorInfo 绑定)与状态
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

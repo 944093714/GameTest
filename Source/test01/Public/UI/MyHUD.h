@@ -26,10 +26,20 @@ public:
 	UPROPERTY()
 	TObjectPtr<UMyUserWidget> OverlayWidget;
 
-	/** 获取覆盖层控件控制器；若尚未创建则先创建并完成参数注入与依赖绑定（懒加载） */
+	/**
+	 * 获取覆盖层控件控制器（懒加载）：若尚未创建则先创建，并完成参数注入与依赖绑定。
+	 * @param Params 控制器所需的四项数据（PC / PS / GAS / 属性集）
+	 * @return 覆盖层控件控制器实例
+	 */
 	UOverlayMyWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& Params);
 
-	/** 初始化覆盖层：创建控件 + 控制器，把 PC/PS/GAS/属性集注入，并广播初始值到 UI */
+	/**
+	 * 初始化覆盖层：创建控件 + 控制器，把 PC / PS / GAS / 属性集注入，并广播初始值到 UI。
+	 * @param PC 玩家控制器
+	 * @param PS 玩家状态
+	 * @param ASC 能力系统组件（GAS）
+	 * @param AS 属性集（GAS）
+	 */
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
 protected:

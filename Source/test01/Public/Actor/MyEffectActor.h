@@ -103,6 +103,7 @@ protected:
 	TMap<TWeakObjectPtr<UAbilitySystemComponent>, FActiveEffectHandles> ActiveEffectHandles;
 	
 	
+	// 施加效果时使用的等级：传给 MakeOutgoingSpec 用于生成该等级的效果规格
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Applied Effect")
 	float Levels = 1.f;
 };

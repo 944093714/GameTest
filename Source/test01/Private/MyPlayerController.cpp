@@ -75,20 +75,26 @@ void AMyPlayerController::CursorTrace()
 	}
 }
 
+// 能力标签按键「按下」回调：打印被按下的标签用于调试，后续可在此触发对应技能
 void AMyPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	// 输出日志，标识哪个能力标签被按下
 	UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
 
 }
 
+// 能力标签按键「松开」回调：打印被松开的标签用于调试，后续可在此处理技能释放
 void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	// 输出日志，标识哪个能力标签被松开
 	UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
 
 }
 
+// 能力标签按键「持续按住」回调：打印持续按住的标签用于调试，后续可用于蓄力/持续技能
 void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	// 输出日志，标识哪个能力标签被持续按住
 	UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
 
 }
@@ -128,9 +134,10 @@ void AMyPlayerController::SetupInputComponent()
 	//UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);改为使用自己的增强输入系统
 	UMyEnhancedInputComponent* EnhancedInputComponent = CastChecked<UMyEnhancedInputComponent>(InputComponent);
 	
-	// 动作每次数值变化(Triggered)时调用 Move
+	// 动作每次数值变化(Triggered)时调用 Move 旧版的
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::Move);
-	
+
+	// 依据 MyInputConfig 中配置好的「输入动作→能力标签」映射,把按下/松开/按住三类回调统一绑定到能力标签上 新版的
 	EnhancedInputComponent->BindAbilityActions(MyInputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHeld);
 	
 }

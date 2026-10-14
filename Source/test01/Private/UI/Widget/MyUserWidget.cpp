@@ -7,7 +7,7 @@ void UMyUserWidget::SetWidgetController(UObject* InWidgetController)
 {
 	// 记录传入的控制器对象
 	WidgetController = InWidgetController;
-	UE_LOG(LogTemp, Warning, TEXT("This is SetWidgetController()"));
+	UE_LOG(LogTemp, Warning, TEXT("This is SetWidgetController()")); // 调试日志：确认该函数被调用
 	// 触发蓝图实现的事件，用于将控制器的数据绑定到控件上
 	WidgetControllerSet();
 }

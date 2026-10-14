@@ -23,8 +23,8 @@ class TEST01_API AMyBaseCharacter : public ACharacter, public IAbilitySystemInte
 	GENERATED_BODY()
 
 public:
-	AMyBaseCharacter();
-	virtual void BeginPlay() override;
+	AMyBaseCharacter();                          // 构造函数：创建绑定到右手骨骼插槽的武器子对象
+	virtual void BeginPlay() override;           // 出生时调用（子类可覆写用于初始化 GAS 等）
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;   // 实现 GAS 接口
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集
 protected:
@@ -38,14 +38,18 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 	
+	// 初始属性 GE：在 InitializePrimaryAttributes 中被施加到自身，写入生命/法力等默认值
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category = "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributes;
-	
+
+	// 初始化角色基础属性：把 DefaultPrimaryAttributes 对应的 GE 施加到自身
 	void InitializePrimaryAttributes() const;
-	
+
+	// 启动技能：把 StartupAbilities 里配置的技能注册进 GAS 组件（仅服务器端执行）
 	void AddCharacterAbilities() const;
 private: 
 	
+	// 启动技能列表：出生时批量授予的 GameplayAbility，可在蓝图/编辑器中配置
 	UPROPERTY(EditAnywhere, Category = "Abilities")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 };

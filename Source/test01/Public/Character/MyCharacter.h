@@ -17,7 +17,7 @@ class TEST01_API AMyCharacter : public AMyBaseCharacter
 {
 	GENERATED_BODY()
 public:
-	AMyCharacter();
+	AMyCharacter();                                              // 构造函数：设置移动朝向随速度旋转、平面约束等移动表现
 	virtual void PossessedBy(AController* NewController) override;   // 服务器端：被玩家控制器接管时调用
 	virtual void OnRep_PlayerState() override;                       // 客户端：PlayerState 复制到达时调用
 
