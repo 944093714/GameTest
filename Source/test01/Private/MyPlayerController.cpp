@@ -8,9 +8,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Character/MyEnemy.h"
 #include "Input/MyEnhancedInputComponent.h"
 #include "AbilitySystem/MyAbilitySystemComponent.h"
+#include "Components/SplineComponent.h"
+#include "Input/MyGameplayTags.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -18,6 +22,8 @@
 AMyPlayerController::AMyPlayerController()
 {
 	bReplicates = true; // 允许控制器复制（当前基本为单机用法）
+
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 
 	// // 从 /Game/BP/Input 路径静态加载资源（FObjectFinder 在构造期查找资产）
 	// static ConstructorHelpers::FObjectFinder<UInputMappingContext> IMC(TEXT("/Game/BP/Input/IMC_Mapping.IMC_Mapping"));
@@ -38,12 +44,33 @@ void AMyPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace(); // 核心鼠标高亮逻辑逐帧运行
+
+	AutoRun();
+}
+
+void AMyPlayerController::AutoRun()
+{
+	if (!bAutoRunning)return;
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(
+			ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(
+			LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(Direction);
+
+		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
+	}
 }
 
 // 鼠标追踪：从鼠标位置向下发射可见性射线，命中实现 IMyInterface 的 Actor 时切换高亮
 void AMyPlayerController::CursorTrace()
 {
-	FHitResult CursorHit;
+	
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit); // 可见性通道射线
 	if (!CursorHit.bBlockingHit) return; // 未命中任何物体 → 直接结束
 
@@ -82,37 +109,98 @@ void AMyPlayerController::CursorTrace()
 // 能力标签按键「按下」回调：打印被按下的标签用于调试，后续可在此触发对应技能
 void AMyPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// 输出日志，标识哪个能力标签被按下
-	// UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
-	// GEngine->AddOnScreenDebugMessage(1,3.f,FColor::Green,*InputTag.ToString());
-	
+	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
+	{
+		bTargeting = ThisActor ? true : false;
+		bAutoRunning = false;
+	}
 }
 
 // 能力标签按键「松开」回调：打印被松开的标签用于调试，后续可在此处理技能释放
 void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	// 输出日志，标识哪个能力标签被松开
 	// UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
-	// GEngine->AddOnScreenDebugMessage(2,3.f,FColor::Red,*InputTag.ToString());
-	if (GetASC() == nullptr) return;
-	GetASC()->AbilityInputTagReleased(InputTag);
+	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+		if (bTargeting)
+		{
+			if (GetASC())
+			{
+				GetASC()->AbilityInputTagHeld(InputTag);
+			}
+		}
+		else
+		{
+			APawn* ControlledPawn = GetPawn();
+			if (FollowTime <= ShortPressThreshold)
+			{
+				if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+					this, ControlledPawn->GetActorLocation(), CachedDestination))
+				{
+					Spline->ClearSplinePoints();
+					for (const FVector& SplinePoint : NavPath->PathPoints)
+					{
+						Spline->AddSplinePoint(SplinePoint, ESplineCoordinateSpace::World);
+						DrawDebugSphere(GetWorld(), SplinePoint, 8.f, 8, FColor::Green, false, 5.f);
+					}
+					bAutoRunning = true;
+				}
+			}
+			FollowTime = 0.f;
+			bTargeting = false;
+		}
+	}
 }
 
 // 能力标签按键「持续按住」回调：打印持续按住的标签用于调试，后续可用于蓄力/持续技能
 void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	// 输出日志，标识哪个能力标签被持续按住
 	// UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
-	// GEngine->AddOnScreenDebugMessage(3,3.f,FColor::Blue,*InputTag.ToString());
-	if (GetASC() == nullptr) return;
-	GetASC()->AbilityInputTagHeld(InputTag);
+
+	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+		if (bTargeting)
+		{
+			if (GetASC())
+			{
+				GetASC()->AbilityInputTagHeld(InputTag);
+			}
+		}
+		else
+		{
+			FollowTime += GetWorld()->GetDeltaSeconds();
+			FHitResult Hit;
+			// if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+			// {
+			// 	CachedDestination = Hit.ImpactPoint;
+			// }
+			if (CursorHit.bBlockingHit)
+			{
+				CachedDestination = CursorHit.ImpactPoint;
+			}
+			if (APawn* ControlledPawn = GetPawn())
+			{
+				const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+				ControlledPawn->AddMovementInput(WorldDirection);
+			}
+		}
+	}
 }
 
 UMyAbilitySystemComponent* AMyPlayerController::GetASC()
 {
 	if (MyAbilitySystemComponent == nullptr)
 	{
-		MyAbilitySystemComponent = Cast<UMyAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+		MyAbilitySystemComponent = Cast<UMyAbilitySystemComponent>(
+			UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	}
 	return MyAbilitySystemComponent;
 }
@@ -126,7 +214,8 @@ void AMyPlayerController::BeginPlay()
 	check(MyInputMappingContext); // 校验输入上下文已加载成功
 
 	// 获取本地玩家子系统并注册映射上下文（优先级 0）
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+		GetLocalPlayer());
 
 	if (Subsystem != nullptr)
 	{
@@ -152,14 +241,14 @@ void AMyPlayerController::SetupInputComponent()
 	// PlayerController 的 InputComponent 是增强输入组件
 	//UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);改为使用自己的增强输入系统
 	UMyEnhancedInputComponent* EnhancedInputComponent = CastChecked<UMyEnhancedInputComponent>(InputComponent);
-	
+
 	// 动作每次数值变化(Triggered)时调用 Move 旧版的
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::Move);
 
 	//新版的绑定
 	// 依据 MyInputConfig 中配置好的「输入动作→能力标签」映射,把按下/松开/按住三类回调统一绑定到能力标签上
-	EnhancedInputComponent->BindAbilityActions(MyInputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHeld);
-	
+	EnhancedInputComponent->BindAbilityActions(MyInputConfig, this, &ThisClass::AbilityInputTagPressed,
+	                                           &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
 // 移动处理：将 2D 输入轴量转为相对视角(仅 Yaw)的前/右方向输入
