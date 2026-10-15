@@ -80,4 +80,6 @@ private:
 
 	// 自动奔跑逻辑：沿样条朝目标移动，到达误差半径后停止
 	void AutoRun();
+	void IsAutoRun();
+	void PressRun();
 };

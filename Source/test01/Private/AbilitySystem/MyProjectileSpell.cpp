@@ -4,6 +4,7 @@
 #include "AbilitySystem/MyProjectileSpell.h"
 
 #include "Actor/MyProjectile.h"
+#include "GameFramework/PlayerController.h"
 #include "Interface/CombatInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -27,9 +28,31 @@ void UMyProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		const FVector SocketLocation = CombatInerface->GetCombatSocketLocation();
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SocketLocation);
+//==================
+		// —— 旋转：让火焰弹朝向鼠标 ——
+		// 施法者 AvatarActor(能力不是 Actor，方向需从 AvatarActor 身上取)
+		AActor* AvatarActor = GetAvatarActorFromActorInfo();
 
-		//TODO：添加旋转
+		// 默认朝向：若拿不到鼠标点(无控制器/未命中)，则朝角色当前前向发射
+		FVector TargetLocation = SocketLocation;
+		if (AvatarActor)
+		{
+			TargetLocation = SocketLocation + AvatarActor->GetActorForwardVector() * 100.f;
+		}
 
+		// 尝试读取鼠标下的可见命中点作为真实目标
+		if (const APlayerController* PC = Cast<APlayerController>(AvatarActor->GetInstigatorController()))
+		{
+			FHitResult CursorHit;
+			if (PC->GetHitResultUnderCursor(ECC_Visibility, false, CursorHit) && CursorHit.bBlockingHit)
+			{
+				TargetLocation = CursorHit.ImpactPoint;   // 鼠标下的可见命中点(通常投影到地面/物体)
+			}
+		}
+
+		// 由"施法点 -> 鼠标点"的方向构造旋转(投射物沿本地 X 轴飞行)
+		SpawnTransform.SetRotation((TargetLocation - SocketLocation).Rotation().Quaternion());
+//=================
 
 		// 延迟生成子弹：先配置好子弹的 Owner 与 Instigator，再在 FinishSpawning 时真正产出
 		AMyProjectile* Projectile = GetWorld()->SpawnActorDeferred<AMyProjectile>(
@@ -41,6 +64,8 @@ void UMyProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 		// 完成延迟生成，触发子弹的事件(如 OnConstruction)
 		Projectile->FinishSpawning(SpawnTransform);
+		// 结束位置，文件末尾新增
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, /*正常结束，非取消*/ false);
 
 	}
 }

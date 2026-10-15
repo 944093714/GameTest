@@ -64,7 +64,50 @@ void AMyPlayerController::AutoRun()
 		if (DistanceToDestination <= AutoRunAcceptanceRadius)
 		{
 			bAutoRunning = false;
+			FollowTime = 0.f;
 		}
+	}
+}
+
+//提取出自动移动的绘制逻辑
+void AMyPlayerController::IsAutoRun()
+{
+	APawn* ControlledPawn = GetPawn();
+	if (FollowTime <= ShortPressThreshold)
+	{
+		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
+			this, ControlledPawn->GetActorLocation(), CachedDestination))
+		{
+			Spline->ClearSplinePoints(); // 清空旧路径
+			// 把寻路得到的路径点填入样条，后续由 AutoRun 沿样条行进
+			for (const FVector& SplinePoint : NavPath->PathPoints)
+			{
+				Spline->AddSplinePoint(SplinePoint, ESplineCoordinateSpace::World);
+				DrawDebugSphere(GetWorld(), SplinePoint, 8.f, 8, FColor::Green, false, 5.f); // 调试可视化路径点
+			}
+			bAutoRunning = true; // 开启自动奔跑
+		}
+	}
+	FollowTime = 0.f;
+	bTargeting = false;
+}
+
+void AMyPlayerController::PressRun()
+{
+	FollowTime += GetWorld()->GetDeltaSeconds();
+	FHitResult Hit;
+	// if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
+	// {
+	// 	CachedDestination = Hit.ImpactPoint;
+	// }
+	if (CursorHit.bBlockingHit)
+	{
+		CachedDestination = CursorHit.ImpactPoint;
+	}
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		ControlledPawn->AddMovementInput(WorldDirection);
 	}
 }
 
@@ -110,51 +153,37 @@ void AMyPlayerController::CursorTrace()
 // 能力标签按键「按下」回调：打印被按下的标签用于调试，后续可在此触发对应技能
 void AMyPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
 	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
 	{
-		bTargeting = ThisActor ? true : false;
-		bAutoRunning = false;
+		bTargeting = ThisActor ? true : false;//是否在角色身上
+		bAutoRunning = false;//是否使用自动寻路
 	}
 }
 
 // 能力标签按键「松开」回调：打印被松开的标签用于调试，后续可在此处理技能释放
 void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
-	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
+	UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
+	if (!InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
 	{
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagReleased(InputTag);
 		}
-		if (bTargeting)
+		return;
+	}
+	
+	if (bTargeting)
+	{
+		if (GetASC())
 		{
-			if (GetASC())
-			{
-				GetASC()->AbilityInputTagHeld(InputTag);
-			}
+			GetASC()->AbilityInputTagReleased(InputTag);
 		}
-		else
-		{
-			APawn* ControlledPawn = GetPawn();
-			if (FollowTime <= ShortPressThreshold)
-			{
-				if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
-					this, ControlledPawn->GetActorLocation(), CachedDestination))
-				{
-					Spline->ClearSplinePoints(); // 清空旧路径
-					// 把寻路得到的路径点填入样条，后续由 AutoRun 沿样条行进
-					for (const FVector& SplinePoint : NavPath->PathPoints)
-					{
-						Spline->AddSplinePoint(SplinePoint, ESplineCoordinateSpace::World);
-						DrawDebugSphere(GetWorld(), SplinePoint, 8.f, 8, FColor::Green, false, 5.f); // 调试可视化路径点
-					}
-					bAutoRunning = true; // 开启自动奔跑
-				}
-			}
-			FollowTime = 0.f;
-			bTargeting = false;
-		}
+	}
+	else
+	{
+		IsAutoRun();
 	}
 }
 
@@ -162,40 +191,29 @@ void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	// UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
-
-	if (InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
+	//不是鼠标左键 就判定为技能 进行激活
+	if (!InputTag.MatchesTagExact(InputTag_LMB)) //我并没有像教程一样创建结构体，使用是全局的标签变量，直接使用就可以
 	{
 		if (GetASC())
 		{
 			GetASC()->AbilityInputTagHeld(InputTag);
 		}
-		if (bTargeting)
+		return;
+	}
+	
+	if (bTargeting)//是鼠标左键点击到了目标，进行激活左键
+	{
+		if (GetASC())
 		{
-			if (GetASC())
-			{
-				GetASC()->AbilityInputTagHeld(InputTag);
-			}
-		}
-		else
-		{
-			FollowTime += GetWorld()->GetDeltaSeconds();
-			FHitResult Hit;
-			// if (GetHitResultUnderCursor(ECC_Visibility, false, Hit))
-			// {
-			// 	CachedDestination = Hit.ImpactPoint;
-			// }
-			if (CursorHit.bBlockingHit)
-			{
-				CachedDestination = CursorHit.ImpactPoint;
-			}
-			if (APawn* ControlledPawn = GetPawn())
-			{
-				const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-				ControlledPawn->AddMovementInput(WorldDirection);
-			}
+			GetASC()->AbilityInputTagHeld(InputTag);//转发标签到ASC,ASC才是真正的激活技能，技能的启动是技能继承于GA,重写了激活函数。
 		}
 	}
+	else//按压移动
+	{
+		PressRun();
+	}
 }
+
 
 // 获取玩家身上的 AbilitySystemComponent（懒加载，仅首次为空时从 Pawn 上查询并缓存）
 UMyAbilitySystemComponent* AMyPlayerController::GetASC()
