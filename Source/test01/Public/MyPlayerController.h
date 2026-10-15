@@ -45,7 +45,7 @@ private:
 	IMyInterface* LastActor;   // 上一帧命中的接口对象
 	IMyInterface* ThisActor;   // 当前帧命中的接口对象
 	
-	
+	//三个回调函数通过BindAbilityActions 进行绑定
 	// 能力输入回调：当绑定了对应能力标签的按键被「按下」时触发
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	// 能力输入回调：当绑定了对应能力标签的按键被「松开」时触发

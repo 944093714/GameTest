@@ -20,6 +20,7 @@ class TEST01_API AMyPlayerState : public APlayerState, public IAbilitySystemInte
 	GENERATED_BODY()
 
 public:
+	/** 构造函数：创建并配置玩家专属的 GAS 组件与属性集 */
 	AMyPlayerState();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;   // 实现 GAS 接口
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集

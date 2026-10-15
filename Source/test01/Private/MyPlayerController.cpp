@@ -156,7 +156,8 @@ void AMyPlayerController::SetupInputComponent()
 	// 动作每次数值变化(Triggered)时调用 Move 旧版的
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::Move);
 
-	// 依据 MyInputConfig 中配置好的「输入动作→能力标签」映射,把按下/松开/按住三类回调统一绑定到能力标签上 新版的
+	//新版的绑定
+	// 依据 MyInputConfig 中配置好的「输入动作→能力标签」映射,把按下/松开/按住三类回调统一绑定到能力标签上
 	EnhancedInputComponent->BindAbilityActions(MyInputConfig,this,&ThisClass::AbilityInputTagPressed,&ThisClass::AbilityInputTagReleased,&ThisClass::AbilityInputTagHeld);
 	
 }

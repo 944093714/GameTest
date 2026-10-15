@@ -24,6 +24,7 @@ class TEST01_API UMyGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
+	// 该技能的起始输入标签：在蓝图默认值中配置，用于标识按下哪个输入键可触发此技能
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	FGameplayTag StartInputTag;
 };
