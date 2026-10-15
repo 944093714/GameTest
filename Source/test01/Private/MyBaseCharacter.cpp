@@ -27,6 +27,7 @@ UAbilitySystemComponent* AMyBaseCharacter::GetAbilitySystemComponent() const
 	return AbilitySystem;
 }
 
+// 获取武器尖端插槽的世界位置：返回 WeaponTipSocketName 对应插槽的坐标
 FVector AMyBaseCharacter::GetCombatSocketLocation()
 {
 	return Weapon->GetSocketLocation(WeaponTipSocketName);

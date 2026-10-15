@@ -9,13 +9,13 @@
 struct FOnAttributeChangeData;
 // ===== HUD 覆盖层（Overlay）专用的动态多播委托 声明委托 =====
 // 每声明一个「属性 → UI」的转发事件：当某属性变化时，由控制器把新值广播给绑定的蓝图控件。
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, Health);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, Health); // 生命值变化委托
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, float, MaxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxHealthChangedSignature, float, MaxHealth); // 最大生命值变化委托
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChangedSignature, float, Mana);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnManaChangedSignature, float, Mana); // 法力值变化委托
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature, float, MaxMana);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxManaChangedSignature, float, MaxMana); // 最大法力值变化委托
 
 /**
  * 覆盖层（Overlay HUD）控件控制器。

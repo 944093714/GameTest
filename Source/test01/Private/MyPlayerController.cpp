@@ -45,9 +45,10 @@ void AMyPlayerController::PlayerTick(float DeltaTime)
 
 	CursorTrace(); // 核心鼠标高亮逻辑逐帧运行
 
-	AutoRun();
+	AutoRun(); // 每帧驱动自动奔跑的移动
 }
 
+// 自动奔跑：让受控 Pawn 沿样条移动，直到接近目标点(误差在 AutoRunAcceptanceRadius 内)后停止
 void AMyPlayerController::AutoRun()
 {
 	if (!bAutoRunning)return;
@@ -141,13 +142,14 @@ void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(
 					this, ControlledPawn->GetActorLocation(), CachedDestination))
 				{
-					Spline->ClearSplinePoints();
+					Spline->ClearSplinePoints(); // 清空旧路径
+					// 把寻路得到的路径点填入样条，后续由 AutoRun 沿样条行进
 					for (const FVector& SplinePoint : NavPath->PathPoints)
 					{
 						Spline->AddSplinePoint(SplinePoint, ESplineCoordinateSpace::World);
-						DrawDebugSphere(GetWorld(), SplinePoint, 8.f, 8, FColor::Green, false, 5.f);
+						DrawDebugSphere(GetWorld(), SplinePoint, 8.f, 8, FColor::Green, false, 5.f); // 调试可视化路径点
 					}
-					bAutoRunning = true;
+					bAutoRunning = true; // 开启自动奔跑
 				}
 			}
 			FollowTime = 0.f;
@@ -195,6 +197,7 @@ void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	}
 }
 
+// 获取玩家身上的 AbilitySystemComponent（懒加载，仅首次为空时从 Pawn 上查询并缓存）
 UMyAbilitySystemComponent* AMyPlayerController::GetASC()
 {
 	if (MyAbilitySystemComponent == nullptr)

@@ -29,8 +29,10 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;   // 实现 GAS 接口
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集
 	
+	// 武器尖端插槽名：用于定位伤害/生成点(如子弹)
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName WeaponTipSocketName;
+	// 获取武器尖端插槽的世界坐标(用于瞄准/生成等)
 	virtual FVector GetCombatSocketLocation() override;
 	
 protected:

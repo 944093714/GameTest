@@ -60,19 +60,24 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UMyAbilitySystemComponent> MyAbilitySystemComponent;
+	// 获取 ASC（懒加载，首次调用时从 Pawn 上取得）
 	UMyAbilitySystemComponent* GetASC();
 
-	FVector CachedDestination = FVector::ZeroVector;
-	float FollowTime = 0.f;
-	float ShortPressThreshold = 0.5f;
-	bool bAutoRunning = false;
-	bool bTargeting = false;
+	// —— 鼠标点击移动/自动奔跑(CursorTrace)状态相关 ——
+	FVector CachedDestination = FVector::ZeroVector; // 当前地面点击的目标点（被持续跟随）
+	float FollowTime = 0.f; // 按住左键移动的累计时长，用于区分短按/长按
+	float ShortPressThreshold = 0.5f; // 短按阈值：低于此值视为单击（用于自动寻路/释放技能）
+	bool bAutoRunning = false; // 是否处于沿样条自动奔跑状态
+	bool bTargeting = false; // 当前是否悬停/瞄准在可交互对象上
 
+	// 自动奔跑到达终点时允许的误差半径
 	UPROPERTY(EditAnywhere)
 	float AutoRunAcceptanceRadius = 50.f;
 
+	// 自动奔跑所要跟随的路径样条组件
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<USplineComponent> Spline;
-	
+
+	// 自动奔跑逻辑：沿样条朝目标移动，到达误差半径后停止
 	void AutoRun();
 };
