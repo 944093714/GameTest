@@ -23,6 +23,7 @@ class TEST01_API UMyGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
-	// 当前未声明成员；后续在此添加能力相关的通用字段与函数(如技能配置、冷却、消耗等)
-
+public:
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	FGameplayTag StartInputTag;
 };

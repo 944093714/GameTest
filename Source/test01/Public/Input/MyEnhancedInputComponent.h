@@ -31,6 +31,7 @@ public:
 	 */
 	template<class UserClass,typename PressedFuncType,typename ReleasedFuncType,typename HeldFuncType>
 	void BindAbilityActions(const UMyInputConfig* InputConfig,UserClass* Object,PressedFuncType PressedFunc,ReleasedFuncType ReleasedFunc,HeldFuncType HeldFunc);
+	
 };
 
 /**
@@ -51,15 +52,15 @@ void UMyEnhancedInputComponent::BindAbilityActions(const UMyInputConfig* InputCo
 			{
 				BindAction(Action.InputAction,ETriggerEvent::Started,Object,PressedFunc,Action.InputTag);
 			}
-			// 若提供了松开回调，则绑定动作的 Started 触发事件（注：此处事件类型与实际回调语义可能需按需核对）
+			// 若提供了松开回调，则绑定动作的 Completed 触发事件（松开瞬间触发）
 			if (ReleasedFunc)
 			{
-				BindAction(Action.InputAction,ETriggerEvent::Started,Object,ReleasedFunc,Action.InputTag);
+				BindAction(Action.InputAction,ETriggerEvent::Completed,Object,ReleasedFunc,Action.InputTag);
 			}
-			// 若提供了持续按住回调，则绑定动作的 Started 触发事件
+			// 若提供了持续按住回调，则绑定动作的 Triggered 触发事件（按住期间持续触发）
 			if (HeldFunc)
 			{
-				BindAction(Action.InputAction,ETriggerEvent::Started,Object,HeldFunc,Action.InputTag);
+				BindAction(Action.InputAction,ETriggerEvent::Triggered,Object,HeldFunc,Action.InputTag);
 			}
 		}
 	}

@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "MyInterface.h"
 #include "MyPlayerController.generated.h"
+class UMyAbilitySystemComponent;
+class UMyEnhancedInputComponent;
 struct FGameplayTag;
 class UMyInputConfig;
 class UInputMappingContext;      // 前置声明：增强输入上下文
@@ -54,4 +56,8 @@ private:
 	// 自定义输入配置资产：用于把按键动作绑定到对应的能力标签(InputTag)
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TObjectPtr<UMyInputConfig> MyInputConfig;
+	
+	UPROPERTY()
+	TObjectPtr<UMyAbilitySystemComponent> MyAbilitySystemComponent;
+	UMyAbilitySystemComponent* GetASC();
 };

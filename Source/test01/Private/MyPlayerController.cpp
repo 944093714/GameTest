@@ -3,12 +3,16 @@
 
 #include "MyPlayerController.h"
 
+#include "AbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "Character/MyEnemy.h"
 #include "Input/MyEnhancedInputComponent.h"
+#include "AbilitySystem/MyAbilitySystemComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 
 // 构造函数：bReplicates 允许网络复制，并从内容资源加载增强输入配置
 AMyPlayerController::AMyPlayerController()
@@ -79,25 +83,40 @@ void AMyPlayerController::CursorTrace()
 void AMyPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	// 输出日志，标识哪个能力标签被按下
-	UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
-
+	// UE_LOG(LogTemp, Warning, TEXT("Pressed %s"), *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(1,3.f,FColor::Green,*InputTag.ToString());
+	
 }
 
 // 能力标签按键「松开」回调：打印被松开的标签用于调试，后续可在此处理技能释放
 void AMyPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	// 输出日志，标识哪个能力标签被松开
-	UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
-
+	// UE_LOG(LogTemp, Warning, TEXT("Released %s"), *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(2,3.f,FColor::Red,*InputTag.ToString());
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagReleased(InputTag);
 }
 
 // 能力标签按键「持续按住」回调：打印持续按住的标签用于调试，后续可用于蓄力/持续技能
 void AMyPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	// 输出日志，标识哪个能力标签被持续按住
-	UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
-
+	// UE_LOG(LogTemp, Warning, TEXT("Held %s"), *InputTag.ToString());
+	// GEngine->AddOnScreenDebugMessage(3,3.f,FColor::Blue,*InputTag.ToString());
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagHeld(InputTag);
 }
+
+UMyAbilitySystemComponent* AMyPlayerController::GetASC()
+{
+	if (MyAbilitySystemComponent == nullptr)
+	{
+		MyAbilitySystemComponent = Cast<UMyAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return MyAbilitySystemComponent;
+}
+
 
 // 游戏开始：注册输入映射上下文、显示鼠标光标、设置"游戏+UI"混合输入模式
 void AMyPlayerController::BeginPlay()
