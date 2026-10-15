@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "Interface/CombatInterface.h"
 #include "MyBaseCharacter.generated.h"
 
 
@@ -18,7 +19,7 @@ class UGameplayAbility;
  * 玩家(AMyCharacter)与敌人(AMyEnemy)都继承它。
  */
 UCLASS()
-class TEST01_API AMyBaseCharacter : public ACharacter, public IAbilitySystemInterface
+class TEST01_API AMyBaseCharacter : public ACharacter, public IAbilitySystemInterface,public ICombatInterface
 {
 	GENERATED_BODY()
 
@@ -27,6 +28,11 @@ public:
 	virtual void BeginPlay() override;           // 出生时调用（子类可覆写用于初始化 GAS 等）
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;   // 实现 GAS 接口
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }                // 内联取属性集
+	
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName WeaponTipSocketName;
+	virtual FVector GetCombatSocketLocation() override;
+	
 protected:
 	// 右手武器(实际挂在骨骼插槽 WeaponHandSocket 上)
 	UPROPERTY(EditAnywhere, Category = "Combat")

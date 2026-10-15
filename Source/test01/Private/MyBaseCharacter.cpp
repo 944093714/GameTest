@@ -27,6 +27,11 @@ UAbilitySystemComponent* AMyBaseCharacter::GetAbilitySystemComponent() const
 	return AbilitySystem;
 }
 
+FVector AMyBaseCharacter::GetCombatSocketLocation()
+{
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
+}
+
 // 初始化角色的基础属性：把"初始属性 GE"施加到自身，一次性写入生命/法力等默认值
 // 通常在 BeginPlay 或组件就绪后调用一次
 void AMyBaseCharacter::InitializePrimaryAttributes() const
